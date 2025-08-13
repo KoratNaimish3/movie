@@ -6,8 +6,12 @@ import { ArrowRightIcon, ClockIcon } from 'lucide-react'
 import ISOTimeFormat from '../lib/ISOTimeFormat'
 import BlurCircle from '../Components/BlurCircle'
 import toast from 'react-hot-toast'
+import { useAppContext } from '../Context/AppContext'
 
 function SitLayout() {
+
+  const { axios, getToken, fetchFavoriteMovie, user, favoriteMovies } = useAppContext()
+
 
   const groupRows = [["A", "B"], ["C", "D"], ["E", "F"], ["G", "H"], ["I", "J"]]
 
@@ -15,17 +19,32 @@ function SitLayout() {
   const navigate = useNavigate()
   const [selectedSeats, setSelectedSeats] = useState([])
   const [selectedTime, setSelectedtime] = useState(null)
+  const [occupiteSeats, setOccupiteSeats] = useState([])
   const [show, setShow] = useState(null)
 
   const getShow = async () => {
-    const show = dummyShowsData.find(show => show._id === id)
-    if (show) {
-      setShow({
-        movie: show,
-        dateTime: dummyDateTimeData
-      })
-    }
+    try {
+      const { data } = await axios.get(`/api/show/${id}`)
 
+      setShow({
+        movie: data.movie,
+        dateTime: data.dateTime
+      })
+
+    } catch (error) {
+      console.log("Error in getShow :-", error)
+    }
+  }
+
+  const getOccupiteSeats = async () => {
+    try {
+      const { data } = await axios.get(`/api/booking/seats/${selectedTime.showId}`)
+      setOccupiteSeats(data.occupiedSeats)
+
+    } catch (error) {
+      console.log("Error in getOccupiteSeats :-", error)
+
+    }
   }
 
   const handleSeatClick = (seatId) => {
@@ -34,6 +53,11 @@ function SitLayout() {
     }
     if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
       return toast("You Can Only select 5 Seats")
+    }
+
+    if (occupiteSeats.includes(seatId)) {
+      return toast("Seat are already reversed")
+
     }
     setSelectedSeats(prev => prev.includes(seatId) ? prev.filter(seat => seat !== seatId) : [...prev, seatId])
 
@@ -44,7 +68,10 @@ function SitLayout() {
       {Array.from({ length: count }, (_, i) => {
         const seatId = `${row}${i + 1}`
         return (
-          <button key={seatId} className={`h-8 w-8 rounded border border-primary/60 cursor-pointer ${selectedSeats.includes(seatId) && "bg-primary text-white"}`} onClick={() => handleSeatClick(seatId)}>
+          <button key={seatId} className={`h-8 w-8 rounded border border-primary/60 cursor-pointer
+          ${occupiteSeats.includes(seatId) && "opacity-50"} 
+          ${selectedSeats.includes(seatId) && "bg-primary text-white"}`}
+            onClick={() => handleSeatClick(seatId)}>
             {seatId}
           </button>
         )
@@ -52,17 +79,50 @@ function SitLayout() {
     </div>
   )
 
-  const onCheckOutHandler = () => {
+  const bookTickets = async () => {
+
+    if (!user) {
+      return toast("Please Login to procced...")
+    }
+
     if (selectedSeats.length === 0) {
       return toast("Please Select a Seat")
     }
-    navigate(`/my-bookings`)
-    scrollTo(0, 0)
+
+    const token = await getToken()
+
+    try {
+
+      const payload = {
+        showId: selectedTime.showId,
+        selectedSeats
+      }
+
+      const { data } = await axios.post('/api/booking/create', payload, { headers: { token } })
+
+      window.location.href = data.url
+
+    } catch (error) {
+      console.log("Error in bookTickets", error)
+      if (error.response && error.response.data && error.response.data.message) {
+        toast.error(error.response.data.message)
+      }
+      else {
+        toast.error("An unexpected error occurred. Please try again.");
+      }
+    }
   }
 
   useEffect(() => {
     getShow()
   }, [])
+
+  useEffect(() => {
+    if (selectedTime) {
+      getOccupiteSeats()
+    }
+  }, [selectedTime])
+
 
   return show ? (
     <div className='px-6 md:px-8 lg:px-36 py-30 md:py-50 flex flex-col md:flex-row max-md:items-center'>
@@ -81,7 +141,7 @@ function SitLayout() {
         </div>
 
       </div>
-          
+
       {/* //seat Layout */}
       <div className='relative flex-1 flex flex-col items-center max-md:mt-16 '>
         <BlurCircle top='-100px' left='-100px' />
@@ -107,7 +167,7 @@ function SitLayout() {
         </div>
 
         <button className='flex gap-1 items-center transition mt-20 px-7 py-3 text-sm bg-primary hover:bg-primary-dull rounded-full font-medium cursor-pointer active:scale-95 duration-300'
-          onClick={onCheckOutHandler}>
+          onClick={bookTickets}>
           Process To Checkout
           <ArrowRightIcon strokeWidth={3} className='w-4 h-4' />
 

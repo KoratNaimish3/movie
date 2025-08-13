@@ -5,28 +5,40 @@ import Loading from '../../Components/Loading'
 import Title from '../../Components/Admin/Title'
 import BlurCircle from '../../Components/BlurCircle'
 import dateFormat from '../../lib/dateFormat'
+import { useAppContext } from '../../Context/AppContext'
 
 function Dashboard() {
 
   const currency = import.meta.env.VITE_CURRENCY
+  const { axios, getToken , img_base_url } = useAppContext()
 
+  const [loading, setLoading] = useState(false)
   const [dashboardData, setDashboardData] = useState({
     totalBookings: 0,
     totalRevenue: 0,
     activeShows: [],
-    totalUser: 0
+    totalUsers: 0
   })
-
 
   const dashBoardcard = [
     { title: "Total Bookings", value: dashboardData.totalBookings || "0", icon: ChartLineIcon },
     { title: "Total Revenue", value: currency + dashboardData.totalRevenue || "0", icon: CircleDollarSign },
     { title: "Active Shows", value: dashboardData.activeShows.length || "0", icon: PlayCircleIcon },
-    { title: "Total User", value: dashboardData.totalUser || "0", icon: UserIcon }
+    { title: "Total User", value: dashboardData.totalUsers || "0", icon: UserIcon }
   ]
 
-  const fetchDashnoardData = () => {
-    setDashboardData(dummyDashboardData);
+  const fetchDashnoardData = async () => {
+    const token = await getToken()
+    try {
+
+      const { data } = await axios.get('/api/admin/dashboard', { headers: { token } })
+      setDashboardData(data.DashboardData)
+      setLoading(true)
+
+    } catch (error) {
+      console.log("Error in fetchDashnoardData", error)
+    }
+
   }
 
   useEffect(() => {
@@ -34,7 +46,7 @@ function Dashboard() {
   }, [])
 
 
-  return dashboardData ? (
+  return loading ? (
     <>
       <Title text1={"Admin"} text2={"Dashboard"} />
 
@@ -67,7 +79,7 @@ function Dashboard() {
         {dashboardData.activeShows.map((show) => (
           <div key={show._id} className='w-55 bg-primary/10 pb-3 border border-primary/20 overflow-hidden rounded-lg hover:-translate-y-1 transition duration-300 '>
 
-            <img src={show.movie.backdrop_path} alt="" className='h-50 w-full object-cover' />
+            <img src={img_base_url + show.movie.backdrop_path} alt="" className='h-50 w-full object-cover' />
 
             <p className='font-medium p-2 truncate'>{show.movie.title}</p>
 

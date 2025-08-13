@@ -28,7 +28,7 @@ function Adminsidebar() {
 
             <div className='w-full'>
                 {adminNavLinks.map((link,index)=>(
-                    <NavLink to={link.path} end className={({isActive}) =>` relative flex items-center w-full py-2.5 max-md:justify-center gap-2 text-gray-400 md:pl-10 first:mt-6 ${isActive && 'bg-primary/15 text-primary group'}`}>
+                    <NavLink key={index} to={link.path} end className={({isActive}) =>` relative flex items-center w-full py-2.5 max-md:justify-center gap-2 text-gray-400 md:pl-10 first:mt-6 ${isActive && 'bg-primary/15 text-primary group'}`}>
                         {({isActive})=>(
                             <>
                                 <link.icon className='w-5 h-5'/>

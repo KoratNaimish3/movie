@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { MenuIcon, SearchIcon, TicketPlus, XIcon } from 'lucide-react'
 import { useClerk, UserButton, useUser } from '@clerk/clerk-react'
+import { useAppContext } from '../Context/AppContext'
 
 function Navabar() {
 
@@ -11,6 +12,8 @@ function Navabar() {
   const {openSignIn} = useClerk()
   const navigate =useNavigate()
 
+
+  const {favoriteMovies} = useAppContext()
 
   return (
     <div className='fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-8 lg:px-36 py-5'>
@@ -29,7 +32,9 @@ function Navabar() {
           <Link to={'/movies'} onClick={()=>{scrollTo(0,0) ;  setIsOpen(false)}}>Movies</Link>
           <Link to={'/'} onClick={()=>{scrollTo(0,0) ;  setIsOpen(false)}}>Theaters</Link>
           <Link to={'/'} onClick={()=>{scrollTo(0,0) ;  setIsOpen(false)}}>Releases</Link>
-          <Link to={'/favorite'} onClick={()=>{scrollTo(0,0) ;  setIsOpen(false)}}>Favourites</Link>
+          {
+            favoriteMovies.length > 0  && (<Link to={'/favorite'} onClick={()=>{scrollTo(0,0) ;  setIsOpen(false)}}>Favourites</Link>)
+          }
       </div>
 
       {/* //login and search */}

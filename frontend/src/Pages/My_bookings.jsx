@@ -1,26 +1,38 @@
 import React, { useEffect, useState } from 'react'
-import { dummyBookingData } from '../assets/assets';
-import Loading from '../Components/Loading';
 import BlurCircle from '../Components/BlurCircle';
 import timeFormat from '../lib/timeFormat';
 import dateFormat from '../lib/dateFormat';
+import { useAppContext } from '../Context/AppContext';
 
 function My_bookings() {
 
+  const { axios, getToken, img_base_url, user } = useAppContext()
   const currency = import.meta.env.VITE_CURRENCY;
   const [bookings, setBookings] = useState([])
 
   const getMyBooking = async () => {
-    setBookings(dummyBookingData)
+    const token = await getToken()
+
+    try {
+      const { data } = await axios.get('/api/user/bookings', { headers: { token } })
+      setBookings(data.bookings)
+      console.log("bookings",bookings)
+
+    } catch (error) {
+      console.log("Error in getBooking :- ", error)
+    }
   }
 
   useEffect(() => {
-    getMyBooking()
-  }, [])
+    if (user) {
+      getMyBooking()
+
+    }
+  }, [user])
 
 
 
-  return bookings ? (
+  return bookings.length > 0 ? (
     <div className='relative px-6 md:px-8 lg:px-36 py-30 md:py-50 md:min-h-[80vh]'>
       <BlurCircle top='100px' left='100px' />
 
@@ -33,7 +45,7 @@ function My_bookings() {
         <div key={index} className='flex flex-col md:flex-row justify-between bg-primary/8 border border-primary/20 rounded-lg mt-4 p-2 max-w-3xl'>
 
           <div className='flex flex-col md:flex-row'>
-            <img src={booking.show.movie.poster_path} alt="" className='object-cover md:max-w-46 aspect-video h-auto rounded object-bottom' />
+            <img src={img_base_url + booking.show.movie.poster_path} alt="" className='object-cover md:max-w-46 aspect-video h-auto rounded object-bottom' />
 
             <div className='flex flex-col p-4'>
               <p className='text-lg font-semibold'>{booking.show.movie.title}</p>
@@ -42,15 +54,15 @@ function My_bookings() {
             </div>
           </div>
 
-          <div className='flex flex-col p-4 md:items-end md:text-right'>
+          <div className='flex flex-col p-4 md:items-end md:text-right '>
             <div className='flex items-center gap-4 '>
               <p className='text-xl font-semibold mb-3'>{currency}{booking.amount}</p>
-              {!booking.isPaid && <button className='bg-primary/60 px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer'>Pay Now</button>}
+              {!booking.isPaid && <button className='bg-primary hover:bg-primary/60 duration-300 transition-all px-4 py-1.5 mb-3 text-sm rounded-full font-medium cursor-pointer'>Pay Now</button>}
             </div>
 
             <div className='text-sm'>
               <p><span className='text-gray-400'>Total Tickets : </span>{booking.bookedSeats.length}</p>
-               <p><span className='text-gray-400'>Seat Number : </span>{booking.bookedSeats.join(" , ")}</p>
+              <p><span className='text-gray-400'>Seat Number : </span>{booking.bookedSeats.join(" , ")}</p>
             </div>
 
           </div>
@@ -61,7 +73,9 @@ function My_bookings() {
 
     </div>
   ) : (
-    <Loading />
+    <div className='h-screen flex items-center justify-center'>
+      <p className='text-2xl font-medium'>No Any Booking available</p>
+    </div>
   )
 }
 
