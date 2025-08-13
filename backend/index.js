@@ -18,7 +18,7 @@ connection()
 
 
 //stripe webhook route
-app.use('/api/stripe', express.raw({ type: "application/json" }), stripeWebhooks)
+app.post('/api/stripe', express.raw({ type: "application/json" }), stripeWebhooks)
 
 //middleware
 app.use(cors({
