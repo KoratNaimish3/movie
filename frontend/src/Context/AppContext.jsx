@@ -22,7 +22,6 @@ export const ContextProvider = ({ children }) => {
     const location = useLocation()
     const navigate = useNavigate()
 
-    console.log(shows, isAdmin, favoriteMovies)
 
 
     //Function To Fetch IsAdmin 

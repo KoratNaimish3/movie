@@ -17,7 +17,6 @@ function My_bookings() {
     try {
       const { data } = await axios.get('/api/user/bookings', { headers: { token } })
       setBookings(data.bookings)
-      console.log("bookings",bookings)
 
     } catch (error) {
       console.log("Error in getBooking :- ", error)
