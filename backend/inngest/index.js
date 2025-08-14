@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { Inngest } from "inngest";
 import User from "../models/User.js";
 import Booking from "../models/booking.js";
@@ -5,7 +7,7 @@ import Show from "../models/show.js";
 import sendEmail from "../config/nodemailer.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "movie-ticket-booking"});
+export const inngest = new Inngest({ id: "movie-ticket-booking", eventKey: process.env.INNGEST_EVENT_KEY });
 
 
 //Ingest Function to save data to a database
