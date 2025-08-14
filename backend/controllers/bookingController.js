@@ -94,7 +94,7 @@ export const createBooking = async (req, res) => {
             }
         })
         res.status(200).json({ success: true, url:session.url})
-
+        
 
     } catch (error) {
         console.log("Error in createBooking :-", error)
