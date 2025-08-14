@@ -36,11 +36,11 @@ export const stripeWebhooks = async (req, res) => {
                     paymentLink: ""
                 })
 
-                //send conformation email
-                await inngest.send({
-                    name:'api/show.booked',
-                    data:{bookingId}
-                })
+                // //send conformation email
+                // await inngest.send({
+                //     name:'api/show.booked',
+                //     data:{bookingId}
+                // })
 
                 break;
             }

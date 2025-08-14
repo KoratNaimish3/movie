@@ -64,6 +64,8 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
 
     async ({ event, step }) => {
 
+try {
+    
         const tenMinuteLater = new Date(Date.now() + 10 * 60 * 1000)
 
         await step.sleepUntil('wait-for-10-minutes', tenMinuteLater)
@@ -88,7 +90,9 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
                 await Booking.findByIdAndDelete(booking._id)
             }
         })
-
+} catch (error) {
+    console.log("erron in releaseSeatsAndDeleteBooking" ,error)
+}
     }
 
 )
@@ -99,7 +103,8 @@ const sendBookingConformationEmail = inngest.createFunction(
     { event: 'app/show.booked' },
 
     async ({ event, step }) => {
-        const { bookingId } = event.data
+       try {
+         const { bookingId } = event.data
 
         const booking = await Booking.findById(bookingId).populate({
             path: 'show',
@@ -131,6 +136,10 @@ const sendBookingConformationEmail = inngest.createFunction(
             <br/><br/>
             <p>Enjoy your movie! 🍿</p>
         `})
+       } catch (error) {
+    console.log("erron in sendBookingConformationEmail" ,error)
+        
+       }
     }
 
 
