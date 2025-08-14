@@ -38,7 +38,7 @@ export const stripeWebhooks = async (req, res) => {
 
                 //send conformation email
                 await inngest.send({
-                    name:'api/show.booked',
+                    name:'app/show.booked',
                     data:{bookingId}
                 })
 
