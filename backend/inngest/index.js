@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 import { Inngest } from "inngest";
 import User from "../models/User.js";
 import Booking from "../models/booking.js";
