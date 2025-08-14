@@ -20,6 +20,7 @@ function SitLayout() {
   const [selectedSeats, setSelectedSeats] = useState([])
   const [selectedTime, setSelectedtime] = useState(null)
   const [occupiteSeats, setOccupiteSeats] = useState([])
+  const [disable, setDisable] = useState(false)
   const [show, setShow] = useState(null)
 
   const getShow = async () => {
@@ -89,6 +90,7 @@ function SitLayout() {
       return toast("Please Select a Seat")
     }
 
+    setDisable(true)
     const token = await getToken()
 
     try {
@@ -111,6 +113,8 @@ function SitLayout() {
         toast.error("An unexpected error occurred. Please try again.");
       }
     }
+
+    setDisable(false)
   }
 
   useEffect(() => {
@@ -167,7 +171,7 @@ function SitLayout() {
         </div>
 
         <button className='flex gap-1 items-center transition mt-20 px-7 py-3 text-sm bg-primary hover:bg-primary-dull rounded-full font-medium cursor-pointer active:scale-95 duration-300'
-          onClick={bookTickets}>
+          onClick={bookTickets} disabled={disable}>
           Process To Checkout
           <ArrowRightIcon strokeWidth={3} className='w-4 h-4' />
 

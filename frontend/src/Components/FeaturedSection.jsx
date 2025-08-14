@@ -10,9 +10,6 @@ function FeaturedSection() {
 
   const { shows} = useAppContext()
 
-  
-    
-
     const navigate = useNavigate()
 
     return shows &&(

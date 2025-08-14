@@ -4,6 +4,7 @@ import timeFormat from '../lib/timeFormat';
 import dateFormat from '../lib/dateFormat';
 import { useAppContext } from '../Context/AppContext';
 import { Link } from 'react-router-dom';
+import Loading from '../Components/Loading';
 
 function My_bookings() {
 
@@ -73,9 +74,7 @@ function My_bookings() {
 
     </div>
   ) : (
-    <div className='h-screen flex items-center justify-center'>
-      <p className='text-2xl font-medium'>No Any Booking available</p>
-    </div>
+    <Loading/>
   )
 }
 
