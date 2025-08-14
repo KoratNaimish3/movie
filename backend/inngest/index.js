@@ -2,6 +2,7 @@ import { Inngest } from "inngest";
 import User from "../models/User.js";
 import Booking from "../models/booking.js";
 import Show from "../models/show.js";
+import sendEmail from "../config/nodemailer.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "movie-ticket-booking", eventKey: process.env.INNGSE_EVENT_KEY });
@@ -90,6 +91,48 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
 
     }
 
+)
+
+//inngest function to send email when book a show
+const sendBookingConformationEmail = inngest.createFunction(
+    { id: "send-booking-conformation-email" },
+    { event: 'app/show.booked' },
+
+    async ({ event, step }) => {
+        const { bookingId } = event.data
+
+        const booking = await Booking.findById(bookingId).populate({
+            path: 'show',
+            populate: { path: 'movie', model: 'Movie' }
+        }).populate('user')
+
+        const showDateTime = booking.show.showDateTime.toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        const seatsList = booking.bookedSeats.join(', ');
+
+        await sendEmail({
+            to: booking.user.email,
+            subject: `Payment Conformation "${booking.show.movie.title}" booked!`,
+            body: `
+            <h2>🎉 Booking Confirmed!</h2>
+            <p>Hi ${booking.user.name},</p>
+            <p>Your booking for <strong>${booking.show.movie.title}</strong> is confirmed!</p>
+            <p><strong>Date & Time:</strong> ${showDateTime}</p>
+            <p><strong>Seats:</strong> ${seatsList}</p>
+            <p><strong>Total Paid:</strong> $${booking.amount}</p>
+            <br/>
+            <img src=" Https://image.tmdb.org/t/p/original/${booking.show.movie.poster_path}" alt="${booking.show.movie.title}" style="width:200px; border-radius:10px;" />
+            <br/><br/>
+            <p>Enjoy your movie! 🍿</p>
+        `})
+    }
+
 
 )
 
@@ -99,5 +142,7 @@ export const functions = [
     syncUserCreation,
     syncUserDeletion,
     syncUserUpdation,
-    releaseSeatsAndDeleteBooking
+    releaseSeatsAndDeleteBooking,
+    sendBookingConformationEmail
+
 ];
