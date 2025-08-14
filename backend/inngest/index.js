@@ -4,7 +4,7 @@ import Booking from "../models/booking.js";
 import Show from "../models/show.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "movie-ticket-booking" , eventKey: process.env.INNGSE_EVENT_KEY});
+export const inngest = new Inngest({ id: "movie-ticket-booking", eventKey: process.env.INNGSE_EVENT_KEY });
 
 
 //Ingest Function to save data to a database
@@ -71,16 +71,20 @@ const releaseSeatsAndDeleteBooking = inngest.createFunction(
             const bookingId = event.data.bookingId;
             const booking = await Booking.findById(bookingId)
 
+            if (!booking) return; // safety check
+
             //If payment is not made , release seats and delete booking
             if (!booking.isPaid) {
                 const show = await Show.findById(booking.show)
+                if (!show) return; // safety check
+
                 booking.bookedSeats.forEach((seat) => {
                     delete show.occupiedSeats[seat]
                 })
 
                 show.markModified('occupiedSeats')
                 await show.save()
-                await booking.findByIdAndDelete(booking._id)
+                await Booking.findByIdAndDelete(booking._id)
             }
         })
 
